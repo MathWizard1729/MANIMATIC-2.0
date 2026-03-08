@@ -119,7 +119,7 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-space-900 text-white font-sans overflow-hidden flex relative">
+    <div className="min-h-screen bg-transparent text-white font-sans overflow-hidden flex relative">
       {/* Animated Background Meshes */}
       <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none">
         <div className="absolute top-[-20%] left-[-10%] w-[60%] h-[60%] rounded-full bg-lakers-purple/30 mix-blend-screen filter blur-[120px] animate-blob" />
