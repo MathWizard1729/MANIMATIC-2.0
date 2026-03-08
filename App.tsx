@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Play, Activity, Video, Sparkles, Loader2, RefreshCw, Terminal } from 'lucide-react';
 import { AgentGraph } from './components/AgentGraph';
 
-type Tab = 'graph' | 'preview';
+type Tab = 'graph' | 'preview' | 'telemetry';
 
 interface LogEntry {
   id: string;
@@ -119,7 +119,7 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-transparent text-white font-sans overflow-hidden flex relative">
+    <div className="min-h-screen bg-transparent text-white font-sans overflow-x-hidden flex relative">
       {/* Animated Background Meshes */}
       <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none">
         <div className="absolute top-[-20%] left-[-10%] w-[60%] h-[60%] rounded-full bg-lakers-purple/30 mix-blend-screen filter blur-[120px] animate-blob" />
@@ -128,10 +128,10 @@ export default function App() {
         <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 mix-blend-overlay" />
       </div>
 
-      <div className="relative z-10 w-full h-screen p-4 md:p-6 grid grid-cols-1 lg:grid-cols-12 gap-6 max-w-[1600px] mx-auto">
+      <div className="relative z-10 w-full min-h-screen p-4 md:p-6 grid grid-cols-1 lg:grid-cols-12 gap-6 max-w-[1600px] mx-auto">
         
-        {/* LEFT PANEL: Controls & Telemetry */}
-        <div className="lg:col-span-4 flex flex-col gap-6 h-full">
+        {/* LEFT PANEL: Controls */}
+        <div className="lg:col-span-4 flex flex-col gap-6">
           
           {/* Header */}
           <div className="flex items-center gap-4 bg-space-800/40 backdrop-blur-xl border border-white/10 p-6 rounded-3xl shadow-2xl">
@@ -187,49 +187,12 @@ export default function App() {
               </button>
             </form>
           </div>
-
-          {/* Live Telemetry Logs */}
-          <div className="flex-1 bg-space-900/80 backdrop-blur-xl border border-white/10 rounded-3xl overflow-hidden shadow-2xl flex flex-col relative">
-            <div className="absolute inset-0 pointer-events-none bg-[linear-gradient(transparent_50%,rgba(0,0,0,0.2)_50%)] bg-[length:100%_4px] z-10 opacity-50" />
-            <div className="px-6 py-4 border-b border-white/10 bg-space-800/50 flex items-center gap-3 relative z-20">
-              <Terminal size={16} className="text-lakers-gold" />
-              <h3 className="font-mono text-xs uppercase tracking-widest text-white/70">Live Telemetry</h3>
-            </div>
-            <div className="flex-1 p-6 overflow-y-auto font-mono text-xs sm:text-sm relative z-20 space-y-3">
-              {logs.length === 0 ? (
-                <div className="text-white/30 italic flex items-center h-full justify-center">Awaiting command...</div>
-              ) : (
-                logs.map((log) => (
-                  <motion.div 
-                    initial={{ opacity: 0, x: -10 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    key={log.id} 
-                    className="flex gap-3 leading-relaxed"
-                  >
-                    <span className="text-white/30 shrink-0">[{log.timestamp}]</span>
-                    <span className="shrink-0 w-28 sm:w-32 uppercase tracking-wider font-bold" style={{ color: log.color }}>
-                      {log.agent}
-                    </span>
-                    <span className={`flex-1 ${
-                      log.type === 'error' ? 'text-red-400' :
-                      log.type === 'success' ? 'text-lakers-lightGold' :
-                      log.type === 'warning' ? 'text-lakers-lightPurple' :
-                      'text-white/80'
-                    }`}>
-                      {log.message}
-                    </span>
-                  </motion.div>
-                ))
-              )}
-              <div ref={logsEndRef} />
-            </div>
-          </div>
         </div>
 
         {/* RIGHT PANEL: Visualization */}
-        <div className="lg:col-span-8 flex flex-col h-full bg-space-800/30 backdrop-blur-2xl border border-white/10 rounded-3xl overflow-hidden shadow-2xl">
+        <div className="lg:col-span-8 flex flex-col min-h-[600px] lg:h-[calc(100vh-3rem)] bg-space-800/30 backdrop-blur-2xl border border-white/10 rounded-3xl overflow-hidden shadow-2xl">
           {/* Tabs */}
-          <div className="flex border-b border-white/10 bg-space-900/50 p-2 gap-2">
+          <div className="flex border-b border-white/10 bg-space-900/50 p-2 gap-2 overflow-x-auto">
             <button
               onClick={() => setActiveTab('graph')}
               className={`flex-1 flex items-center justify-center gap-2 px-6 py-3 rounded-xl text-sm font-display font-bold uppercase tracking-wider transition-all ${activeTab === 'graph' ? 'bg-white/10 text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.2)]' : 'text-white/40 hover:text-white/80 hover:bg-white/5'}`}
@@ -240,10 +203,17 @@ export default function App() {
             <button
               onClick={() => setActiveTab('preview')}
               disabled={!videoUrl && !isGenerating}
-              className={`flex-1 flex items-center justify-center gap-2 px-6 py-3 rounded-xl text-sm font-display font-bold uppercase tracking-wider transition-all disabled:opacity-30 disabled:cursor-not-allowed ${activeTab === 'preview' ? 'bg-white/10 text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.2)]' : 'text-white/40 hover:text-white/80 hover:bg-white/5'}`}
+              className={`flex-1 whitespace-nowrap flex items-center justify-center gap-2 px-6 py-3 rounded-xl text-sm font-display font-bold uppercase tracking-wider transition-all disabled:opacity-30 disabled:cursor-not-allowed ${activeTab === 'preview' ? 'bg-white/10 text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.2)]' : 'text-white/40 hover:text-white/80 hover:bg-white/5'}`}
             >
               <Video size={18} />
               Final Render
+            </button>
+            <button
+              onClick={() => setActiveTab('telemetry')}
+              className={`flex-1 whitespace-nowrap flex items-center justify-center gap-2 px-6 py-3 rounded-xl text-sm font-display font-bold uppercase tracking-wider transition-all ${activeTab === 'telemetry' ? 'bg-white/10 text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.2)]' : 'text-white/40 hover:text-white/80 hover:bg-white/5'}`}
+            >
+              <Terminal size={18} />
+              Debug Telemetry
             </button>
           </div>
 
@@ -294,6 +264,47 @@ export default function App() {
                       <p className="font-display font-bold text-lg uppercase tracking-widest text-white/60">Awaiting Render Output...</p>
                     </div>
                   )}
+                </motion.div>
+              )}
+
+              {activeTab === 'telemetry' && (
+                <motion.div
+                  key="telemetry"
+                  initial={{ opacity: 0, scale: 0.98 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.98 }}
+                  transition={{ duration: 0.3 }}
+                  className="absolute inset-0 flex flex-col bg-space-900/80"
+                >
+                  <div className="absolute inset-0 pointer-events-none bg-[linear-gradient(transparent_50%,rgba(0,0,0,0.2)_50%)] bg-[length:100%_4px] z-10 opacity-50" />
+                  <div className="flex-1 p-6 overflow-y-auto font-mono text-xs sm:text-sm relative z-20 space-y-3">
+                    {logs.length === 0 ? (
+                      <div className="text-white/30 italic flex items-center h-full justify-center">Awaiting command...</div>
+                    ) : (
+                      logs.map((log) => (
+                        <motion.div 
+                          initial={{ opacity: 0, x: -10 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          key={log.id} 
+                          className="flex gap-3 leading-relaxed"
+                        >
+                          <span className="text-white/30 shrink-0">[{log.timestamp}]</span>
+                          <span className="shrink-0 w-28 sm:w-32 uppercase tracking-wider font-bold" style={{ color: log.color }}>
+                            {log.agent}
+                          </span>
+                          <span className={`flex-1 ${
+                            log.type === 'error' ? 'text-red-400' :
+                            log.type === 'success' ? 'text-lakers-lightGold' :
+                            log.type === 'warning' ? 'text-lakers-lightPurple' :
+                            'text-white/80'
+                          }`}>
+                            {log.message}
+                          </span>
+                        </motion.div>
+                      ))
+                    )}
+                    <div ref={logsEndRef} />
+                  </div>
                 </motion.div>
               )}
             </AnimatePresence>
